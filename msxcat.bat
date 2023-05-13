@@ -1,0 +1,1 @@
+copy /b DISKROM.BIN + ROM.DSK MSX.ROM
