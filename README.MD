@@ -11,7 +11,7 @@ Tabacus DISK ROM for MSX Gaku
 # ダウンロード
 
 以下のページの Assets からダウンロードできます。  
-https://github.com/tablacus/LSX-Dodgers/releases
+https://github.com/tablacus/TablacusDiskRom/releases
 
 # DSKファイルのROM化方法
 
