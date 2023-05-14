@@ -17,6 +17,8 @@ https://github.com/tablacus/TablacusDiskRom/releases
 
 1. Windowsのコマンドラインで`msxcat.bat`を実行してシステムとディスクイメージ`ROM.DSK`を連結する
 
+※DISKROM.BIN(16KB)の後ろに2DDのDSKファイルを連結しさえすればやり方は何を使ってもOKです。
+
 # 実行方法
 
 1. ROMスロットに`MSX.ROM`をセット
@@ -24,5 +26,5 @@ https://github.com/tablacus/TablacusDiskRom/releases
 3. 起動しない場合はリセットする
 
 ## ライセンス  
-https://github.com/tablacus/TablacusDiskRom/blob/master/LICENSE.TXT  
+https://github.com/tablacus/TablacusDiskRom/blob/main/LICENSE.TXT
 MIT License のオープンソースです。  
