@@ -4,7 +4,7 @@ Tabacus DISK ROM for MSX Gaku
 
 このソフトはMSXのDISK環境のソフトをROM化するソフトです。  
 カラクリとしてはインタースロットコールのCALSLTをフックして低レベルのディスクアクセスをROMディスクに置き換えます。  
-インタースロットコールのCALSLTをフックするのにMath-Packのワークエリアを使用しています。Math-Packを使用しているソフトは動作しないと思われます。  
+インタースロットコールのCALSLTをフックするのにRS-232Cとカセット用パラメータのワークエリアを使用しています。RS-232Cやカセットを使用しているソフトは動作しないと思われます。  
 [LSX-Dodgers](https://github.com/tablacus/LSX-Dodgers)と違ってBASICのソフトをROM化することができますが、DISK BIOSが入っているMSXに限ります。LSX-DodgersはC-BIOSでも動作可能
 
 # ダウンロード
