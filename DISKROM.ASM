@@ -22,7 +22,7 @@
 	JP	DSKSTP
 
 ; Version
-	DB	"Tablacus DISK ROM v0.0.1.0",0
+	DB	"Tablacus DISK ROM v0.0.2.0",0
 
 	INCLUDE	"MSXINIT.ASM"
 	INCLUDE	"MSXDISK.ASM"
