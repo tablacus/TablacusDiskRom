@@ -26,5 +26,5 @@ https://github.com/tablacus/TablacusDiskRom/releases
 3. 起動しない場合はリセットする
 
 ## ライセンス  
-https://github.com/tablacus/TablacusDiskRom/blob/main/LICENSE.TXT
+https://github.com/tablacus/TablacusDiskRom/blob/main/LICENSE.TXT  
 MIT License のオープンソースです。  
