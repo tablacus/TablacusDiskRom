@@ -1,15 +1,17 @@
+[Japanese/日本語](https://github.com/tablacus/TablacusDiskRom/blob/main/README.MD)
+
+
 Tabacus DISK ROM for MSX Gaku
 
 # Overview of features
 
-This software is a software that converts MSX DISK environment software to ROM. 
-The trick is to hook the inter-slot call CALSLT and replace the low-level disk access with ROM disk. 
-It uses the work area for RS-232C and cassette parameters to hook the inter-slot call CALSLT. Software that uses RS-232C or cassette may not work. 
+This software is a software that converts MSX’s DISK environment software to ROM. As a trick, it hooks the inter-slot call CALSLT and replaces low-level disk access with ROM disk. It uses the work area of RS-232C and cassette parameters and function key string storage area to hook the inter-slot call CALSLT. Software that uses RS-232C or cassette or changes function keys may not work. 
+
 Unlike [LSX-Dodgers](https://github.com/tablacus/LSX-Dodgers), you can ROMize BASIC software, but only on MSX with DISK BIOS. LSX-Dodgers can work on C-BIOS
 
 # Download
 
-You can download it from Assets on the following page. 
+You can download it from Assets on the following page.   
 https://github.com/tablacus/TablacusDiskRom/releases
 
 # How to ROMize DSK files
@@ -33,11 +35,23 @@ copy /b DISKROM.BIN + DISK1.DSK + DISK2.dsk DISK1_2.ROM
 2. Set ROM image type to either `ASCII-16K`, `ASCII-8K` (only for 2MB or less), or `Konami-8K` (only for 512MB or less)
 3. Reset if it does not start
 
-## License
+# Switch
+
+Turn off Tablacus DISK ROM
+```basic
+poke &hf390,&h98:poke &hf391,&hf3
+```
+
+Turn on Tablacus DISK ROM
+```basic
+poke &hf390,&h03:poke &hf391,&hfb
+```
+
+# License
 
 [MIT License](https://github.com/tablacus/TablacusDiskRom/blob/main/LICENSE.TXT)
 
-## Thanks
+# Special thanks
 
 Thanks to [HRA!](https://twitter.com/thara1129)'s MSX Memory Architecture, I was able to support MegaROM.
 I really appreciate it.

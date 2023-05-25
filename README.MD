@@ -1,10 +1,13 @@
+[English](https://github.com/tablacus/TablacusDiskRom/blob/main/README_EN.MD)
+
 Tabacus DISK ROM for MSX Gaku
 
 # 機能概略
 
 このソフトはMSXのDISK環境のソフトをROM化するソフトです。  
 カラクリとしてはインタースロットコールのCALSLTをフックして低レベルのディスクアクセスをROMディスクに置き換えます。  
-インタースロットコールのCALSLTをフックするのにRS-232Cとカセット用パラメータのワークエリアを使用しています。RS-232Cやカセットを使用しているソフトは動作しないと思われます。  
+インタースロットコールのCALSLTをフックするのにRS-232Cとカセット用パラメータ及びファンクションキーの文字列保存エリアのワークエリアを使用しています。RS-232Cやカセットを使用しているソフトやファンクションキーを変更するソフトは動作しないと思われます。
+
 [LSX-Dodgers](https://github.com/tablacus/LSX-Dodgers)と違ってBASICのソフトをROM化することができますが、DISK BIOSが入っているMSXに限ります。LSX-DodgersはC-BIOSでも動作可能
 
 # ダウンロード
@@ -33,11 +36,24 @@ copy /b DISKROM.BIN + DISK1.DSK + DISK2.dsk DISK1_2.ROM
 2. ROMイメージのタイプを`ASCII-16K`、`ASCII-8K`(2MB以下の場合のみ)、`Konami-8K`(512MB以下の場合のみ)のいずれかに設定
 3. 起動しない場合はリセットする
 
-## ライセンス
+
+# 切り替え
+
+Tablacus DISK ROMオフ
+```basic
+poke &hf390,&h98:poke &hf391,&hf3
+```
+
+Tablacus DISK ROMオン
+```basic
+poke &hf390,&h03:poke &hf391,&hfb
+```
+
+# ライセンス
 
 [MIT License](https://github.com/tablacus/TablacusDiskRom/blob/main/LICENSE.TXT)
 
-## 感謝
+# 感謝
 
 [HRA!](https://twitter.com/thara1129)さんのMSX Memory Architecture のお陰でメガROMに対応することができました。
 本当にありがたいです。

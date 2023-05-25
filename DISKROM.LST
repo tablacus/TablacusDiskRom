@@ -19,6 +19,7 @@
        0138                     RSLREG  EQU 00138H
                                 
        F3FC                     CS120   EQU 0F3FCH
+       F87F                     FNKSTR  EQU 0F87FH
        FB03                     RSTMP   EQU 0FB03H
        FCC1                     EXPTBL  EQU 0FCC1H
                                 
@@ -35,175 +36,229 @@
        A000                     KONAMI_BANK3_SEL EQU    0A000H
                                 
        FB03                     ISC EQU RSTMP
-       F3FC                     ISC2    EQU CS120
+       F8F3                     ISC_F8  EQU FNKSTR+16*8-12
+       F3FC                     ISC_HOOK    EQU CS120
 [EOF:MSXDEF.ASM:UTF_8]
                                 
 000000 4000                         ORG RUN
                                 
                                 ; MSX ROM header
 000000 4000 4142                    DB  "AB"   ; ID for auto-executable ROM
-000002 4002 3D40                    DW  INIT_ROM   ; Main program execution address.
+000002 4002 0041                    DW  INIT_ROM   ; Main program execution address.
 000004 4004 0000                    DW  0      ; STATEMENT
 000006 4006 0000                    DW  0      ; DEVICE
 000008 4008 0000                    DW  0      ; TEXT
 00000A 400A 000000000000            DW  0,0,0  ; Reserved
                                 
-000010 4010 C30541          10      JP  DISKIO
-000013 4013 C33D41          10      JP  DSKCHG
-000016 4016 C36341          10      JP  GETDPB
-000019 4019 C38342          10      JP  CHOICE
-00001C 401C C38742          10      JP  DSKFMT
-00001F 401F C38942          10      JP  DSKSTP
+000010 4010 C30542          10      JP  DISKIO
+000013 4013 C33D42          10      JP  DSKCHG
+000016 4016 C36342          10      JP  GETDPB
+000019 4019 C3BC43          10      JP  CHOICE
+00001C 401C C3C043          10      JP  DSKFMT
+00001F 401F C3C243          10      JP  DSKSTP
+000022 4022 C3C243          10      JP  BASENT
+000025 4025 37               4      SCF
+000026 4026 C3C043          10      JP  DSKFMT
+000029 4029 C3C243          10      JP  DSKSTP
+00002C 402C 00               4      NOP
+00002D 402D C3C343          10      JP  GETSLT
+000030 4030 2A4BF3          16      LD  HL,(0F34BH)
+000033 4033 C9              10      RET
                                 
+00007F 407F                         ORG 0407FH
+00007F 407F C9              10      RET
                                 ; Version
-000022 4022 5461626C61637573        DB  "Tablacus DISK ROM v0.0.2.0",0
+000080 4080 5461626C61637573        DB  "Tablacus DISK ROM v0.0.3.0",0
             204449534B20524F    
-            4D2076302E302E32    
+            4D2076302E302E33    
             2E3000              
+                                
+0000FF 40FF                         ORG 040FFH
+0000FF 40FF C9              10      RET
                                 
                                     INCLUDE "MSXINIT.ASM"
                                 
                                 ;   Tablacus DISK ROM - INIT
                                 ;
                                 
-       403D                     INIT_ROM:
-00003D 403D 21DB40          10      LD  HL,AT_ISC
-000040 4040 1103FB          10      LD  DE,ISC
-000043 4043 011D00          10      LD  BC,ISC_E-ISC
-000046 4046 EDB0                    LDIR
+       4100                     INIT_ROM:
+000100 4100 21CE41          10      LD  HL,AT_ISC
+000103 4103 1103FB          10      LD  DE,ISC
+000106 4106 011E00          10      LD  BC,ISC_E-ISC
+000109 4109 EDB0                    LDIR
                                 
-000048 4048 21F840          10      LD  HL,AT_ISC2
-00004B 404B 11FCF3          10      LD  DE,ISC2
-00004E 404E 010A00          10      LD  BC,ISC2_E-ISC2
-000051 4051 EDB0                    LDIR
+00010B 410B 21F841          10      LD  HL,AT_ISC_HOOK
+00010E 410E 11FCF3          10      LD  DE,ISC_HOOK
+000111 4111 010A00          10      LD  BC,ISC_HOOK_E-ISC_HOOK
+000114 4114 EDB0                    LDIR
                                 
-000053 4053 2103FB          10      LD  HL,ISC
-000056 4056 2290F3          16      LD  (0F390H),HL
+000116 4116 21EC41          10      LD  HL,AT_ISC_F8
+000119 4119 11F3F8          10      LD  DE,ISC_F8
+00011C 411C 010C00          10      LD  BC,ISC_F8_E-ISC_F8
+00011F 411F EDB0                    LDIR
                                 
-000059 4059 CDB140          17      CALL    GTSL1_
-00005C 405C 3200F4          13      LD  (ROM_SLT),A
+000121 4121 2103FB          10      LD  HL,ISC
+000124 4124 2290F3          16      LD  (0F390H),HL
+                                
+000127 4127 CDA441          17      CALL    GTSL1_
+00012A 412A 32FFF3          13      LD  (ROM_SLT),A
                                                 ;ROMタイプ判別(ASCII-8K/ASCII-16K)
-00005F 405F 3E1F             7      LD  A,01FH
-000061 4061 3204F4          13      LD  (ROM_MODE),A
-000064 4064 3E70             7      LD  A,BANK2_SEL/256
-000066 4066 3205F4          13      LD  (ROM8000H_H),A
+00012D 412D 3E1F             7      LD  A,01FH
+00012F 412F 3203F4          13      LD  (ROM_MODE),A
+000132 4132 3E70             7      LD  A,BANK2_SEL/256
+000134 4134 3204F4          13      LD  (ROM8000H_H),A
                                 
-000069 4069 1E00             7      LD  E,0
-00006B 406B 3A00F4          13      LD  A,(ROM_SLT)
-00006E 406E 210068          10      LD  HL,BANK1_SEL
-000071 4071 CD1400          17      CALL    _WRSLT
+000137 4137 1E00             7      LD  E,0
+000139 4139 3AFFF3          13      LD  A,(ROM_SLT)
+00013C 413C 210068          10      LD  HL,BANK1_SEL
+00013F 413F CD1400          17      CALL    _WRSLT
                                 
-000074 4074 210060          10      LD  HL,06000H
-000077 4077 3A00F4          13      LD  A,(ROM_SLT)
-00007A 407A CD0C00          17      CALL    _RDSLT
-00007D 407D FE41             7      CP  'A'
-00007F 407F 2807            12      JR  Z,ROM8K
+000142 4142 210060          10      LD  HL,06000H
+000145 4145 3AFFF3          13      LD  A,(ROM_SLT)
+000148 4148 CD0C00          17      CALL    _RDSLT
+00014B 414B FE41             7      CP  'A'
+00014D 414D 2807            12      JR  Z,ROM8K
                                                 ;ASCII-8K/Konami-8Kではない(ASCII-16K)
-000081 4081 3E3F             7      LD  A,03FH
-000083 4083 3204F4          13      LD  (ROM_MODE),A
-000086 4086 1828            12      JR  ROMCHECKED
-       4088                     ROM8K:              ;Konami-8Kチェック
-000088 4088 1E01             7      LD  E,1
-00008A 408A 3A00F4          13      LD  A,(ROM_SLT)
-00008D 408D 210070          10      LD  HL,BANK2_SEL
-000090 4090 CD1400          17      CALL    _WRSLT
+00014F 414F 3E3F             7      LD  A,03FH
+000151 4151 3203F4          13      LD  (ROM_MODE),A
+000154 4154 1828            12      JR  ROMCHECKED
+       4156                     ROM8K:              ;Konami-8Kチェック
+000156 4156 1E01             7      LD  E,1
+000158 4158 3AFFF3          13      LD  A,(ROM_SLT)
+00015B 415B 210070          10      LD  HL,BANK2_SEL
+00015E 415E CD1400          17      CALL    _WRSLT
                                 
-000093 4093 1E00             7      LD  E,0
-000095 4095 3A00F4          13      LD  A,(ROM_SLT)
-000098 4098 210080          10      LD  HL,KONAMI_BANK2_SEL
-00009B 409B CD1400          17      CALL    _WRSLT
+000161 4161 1E00             7      LD  E,0
+000163 4163 3AFFF3          13      LD  A,(ROM_SLT)
+000166 4166 210080          10      LD  HL,KONAMI_BANK2_SEL
+000169 4169 CD1400          17      CALL    _WRSLT
                                 
-00009E 409E 210080          10      LD  HL,08000H
-0000A1 40A1 3A00F4          13      LD  A,(ROM_SLT)
-0000A4 40A4 CD0C00          17      CALL    _RDSLT
-0000A7 40A7 FE41             7      CP  'A'
-0000A9 40A9 2005            12      JR  NZ,ROMCHECKED
+00016C 416C 210080          10      LD  HL,08000H
+00016F 416F 3AFFF3          13      LD  A,(ROM_SLT)
+000172 4172 CD0C00          17      CALL    _RDSLT
+000175 4175 FE41             7      CP  'A'
+000177 4177 2005            12      JR  NZ,ROMCHECKED
                                                 ;Konami-8K
-0000AB 40AB 3E80             7      LD  A,KONAMI_BANK2_SEL/256
-0000AD 40AD 3205F4          13      LD  (ROM8000H_H),A
-       40B0                     ROMCHECKED:
-0000B0 40B0 C9              10      RET
+000179 4179 3E80             7      LD  A,KONAMI_BANK2_SEL/256
+00017B 417B 3204F4          13      LD  (ROM8000H_H),A
+       417E                     ROMCHECKED:
+00017E 417E AF               4      XOR A
+00017F 417F 5F               4      LD  E,A
+000180 4180 57               4      LD  D,A
+000181 4181 CDC743          17      CALL    MAPPING
                                 
-       40B1                     GTSL1_:
-0000B1 40B1 E5              11      PUSH    HL      ;Save registers
-0000B2 40B2 D5              11      PUSH    DE
+000184 4184 211480          10      LD  HL,08000H+20        ;BPB_TotSec16   
+000187 4187 3AFFF3          13      LD  A,(ROM_SLT)
+00018A 418A CD0C00          17      CALL    _RDSLT
+00018D 418D F5              11      PUSH    AF
+00018E 418E 211380          10      LD  HL,08000H+19        ;BPB_TotSec16   
+000191 4191 3AFFF3          13      LD  A,(ROM_SLT)
+000194 4194 CD0C00          17      CALL    _RDSLT
+000197 4197 E1              10      POP HL
+                                                    ;HA=TotSec16
+000198 4198 0605             7      LD  B,5
+       419A                     B_DRIVE1:
+00019A 419A CB3C             8      SRL H
+00019C 419C 1F               4      RRA
+00019D 419D 10FB            13      DJNZ    B_DRIVE1
+                                
+00019F 419F 3C               4      INC A
+0001A0 41A0 3205F4          13      LD  (B_DRIVE),A
+0001A3 41A3 C9              10      RET
+                                
+       41A4                     GTSL1_:
+0001A4 41A4 E5              11      PUSH    HL      ;Save registers
+0001A5 41A5 D5              11      PUSH    DE
                                 ;
-0000B3 40B3 CD3801          17      CALL    RSLREG      ;read primary slot #
-0000B6 40B6 0F               4      RRCA
-0000B7 40B7 0F               4      RRCA
-0000B8 40B8 E603             7      AND 11B     ;[A]=000000PP
-0000BA 40BA 5F               4      LD  E,A
-0000BB 40BB 1600             7      LD  D,0     ;[DE]=000000PP
-0000BD 40BD 21C1FC          10      LD  HL,EXPTBL
-0000C0 40C0 19              11      ADD HL,DE       ;[HL]=EXPTBL+000000PP
-0000C1 40C1 5F               4      LD  E,A     ;[E]=000000PP
-0000C2 40C2 7E               7      LD  A,(HL)      ;[A]=(EXPTBL+000000PP)
-0000C3 40C3 E680             7      AND 80H     ;Use only MSB
-0000C5 40C5 2811            12      JR  Z,GTSL1NOEXP
-0000C7 40C7 B3               4      OR  E       ;[A]=F00000PP
-0000C8 40C8 5F               4      LD  E,A     ;save primary slot number
-0000C9 40C9 23               6      INC HL      ;point to SLTTBL entry
-0000CA 40CA 23               6      INC HL
-0000CB 40CB 23               6      INC HL
-0000CC 40CC 23               6      INC HL
-0000CD 40CD 7E               7      LD  A,(HL)      ;get currently expansion slot register
-0000CE 40CE 0F               4      RRCA
-0000CF 40CF 0F               4      RRCA
-0000D0 40D0 E603             7      AND 11B     ;[A] = 000000SS
-0000D2 40D2 07               4      RLCA
-0000D3 40D3 07               4      RLCA            ;[A] = 0000SS00
-0000D4 40D4 B3               4      OR  E       ;[A] = F000SSPP
+0001A6 41A6 CD3801          17      CALL    RSLREG      ;read primary slot #
+0001A9 41A9 0F               4      RRCA
+0001AA 41AA 0F               4      RRCA
+0001AB 41AB E603             7      AND 11B     ;[A]=000000PP
+0001AD 41AD 5F               4      LD  E,A
+0001AE 41AE 1600             7      LD  D,0     ;[DE]=000000PP
+0001B0 41B0 21C1FC          10      LD  HL,EXPTBL
+0001B3 41B3 19              11      ADD HL,DE       ;[HL]=EXPTBL+000000PP
+0001B4 41B4 5F               4      LD  E,A     ;[E]=000000PP
+0001B5 41B5 7E               7      LD  A,(HL)      ;[A]=(EXPTBL+000000PP)
+0001B6 41B6 E680             7      AND 80H     ;Use only MSB
+0001B8 41B8 2811            12      JR  Z,GTSL1NOEXP
+0001BA 41BA B3               4      OR  E       ;[A]=F00000PP
+0001BB 41BB 5F               4      LD  E,A     ;save primary slot number
+0001BC 41BC 23               6      INC HL      ;point to SLTTBL entry
+0001BD 41BD 23               6      INC HL
+0001BE 41BE 23               6      INC HL
+0001BF 41BF 23               6      INC HL
+0001C0 41C0 7E               7      LD  A,(HL)      ;get currently expansion slot register
+0001C1 41C1 0F               4      RRCA
+0001C2 41C2 0F               4      RRCA
+0001C3 41C3 E603             7      AND 11B     ;[A] = 000000SS
+0001C5 41C5 07               4      RLCA
+0001C6 41C6 07               4      RLCA            ;[A] = 0000SS00
+0001C7 41C7 B3               4      OR  E       ;[A] = F000SSPP
                                 ;
-       40D5                     GTSL1END:
-0000D5 40D5 D1              10      POP DE
-0000D6 40D6 E1              10      POP HL
-0000D7 40D7 C9              10      RET
-       40D8                     GTSL1NOEXP:
-0000D8 40D8 7B               4      LD  A,E     ;[A] = 000000PP
-0000D9 40D9 18FA            12      JR  GTSL1END
+       41C8                     GTSL1END:
+0001C8 41C8 D1              10      POP DE
+0001C9 41C9 E1              10      POP HL
+0001CA 41CA C9              10      RET
+       41CB                     GTSL1NOEXP:
+0001CB 41CB 7B               4      LD  A,E     ;[A] = 000000PP
+0001CC 41CC 18FA            12      JR  GTSL1END
                                 
-       40DB                     AT_ISC:
-0000DB FB03                         ORG ISC,AT_ISC-RUN
-0000DB FB03 F5              11      PUSH    AF
-0000DC FB04 DD7C             9      LD  A,IXH
-0000DE FB06 FE40             7      CP  040H
-0000E0 FB08 2013            12      JR  NZ,ISC1
-0000E2 FB0A DD7D             9      LD  A,IXL
-0000E4 FB0C FE20             7      CP  020H
-0000E6 FB0E 300D            12      JR  NC,ISC1
+       41CE                     AT_ISC:
+0001CE FB03                         ORG ISC,AT_ISC-RUN
+0001CE FB03 F5              11      PUSH    AF
+0001CF FB04 DD7C             9      LD  A,IXH
+0001D1 FB06 FE40             7      CP  040H
+0001D3 FB08 2014            12      JR  NZ,ISC_DEF
+0001D5 FB0A 3AFFFF          13      LD  A,(0FFFFH)
+0001D8 FB0D E60C             7      AND 00CH
+0001DA FB0F FE04             7      CP  4
+0001DC FB11 200B            12      JR  NZ,ISC_DEF
+0001DE FB13 08               4      EX  AF,AF'
+0001DF FB14 CB57             8      BIT 2,A
+0001E1 FB16 2805            12      JR  Z,ISC_DEF2
+0001E3 FB18 CB5F             8      BIT 3,A
+0001E5 FB1A C2F4F8          10      JP  NZ,CHECK_IXL
+       FB1D                     ISC_DEF2:
+0001E8 FB1D 08               4      EX  AF,AF'
+       FB1E                     ISC_DEF:
+0001E9 FB1E F1              10      POP AF
+0001EA FB1F DDE9             8      JP  (IX)
                                 
-0000E8 FB10 08               4      EX  AF,AF'
-0000E9 FB11 D5              11      PUSH    DE
-0000EA FB12 5F               4      LD  E,A
-0000EB FB13 E60C             7      AND 00CH
-0000ED FB15 FE0C             7      CP  00CH
-       FB16                     SWC1    EQU $-1
-0000EF FB17 7B               4      LD  A,E
-0000F0 FB18 D1              10      POP DE
-0000F1 FB19 CAFCF3          10      JP  Z,ISC2
-0000F4 FB1C 08               4      EX  AF,AF'
-       FB1D                     ISC1:
-0000F5 FB1D F1              10      POP AF
-       FB1E                     ISC3:
-0000F6 FB1E DDE9             8      JP  (IX)
-       FB20                     ISC_E:
-0000F8 40F8                         ORG $$+RUN          ;$DEPHASE
+       FB21                     ISC_E:
+0001EC 41EC                         ORG $$+RUN          ;$DEPHASE
                                 
-       40F8                     AT_ISC2:
-0000F8 F3FC                         ORG ISC2,AT_ISC2-RUN
-0000F8 F3FC 08               4      EX  AF,AF'
-0000F9 F3FD F1              10      POP AF
-0000FA F3FE FD2600          10      LD  IYH,0
-       F400                     ROM_SLT EQU $-1
-0000FD F401 C31C00          10      JP  _CALSLT
-       F404                     ROM_MODE:
-000100 F404 00                      DB  0
-       F405                     ROM8000H_H:
-000101 F405 00                      DB  0
+       41EC                     AT_ISC_F8:
+0001EC F8F3                         ORG ISC_F8,AT_ISC_F8-RUN
+0001EC F8F3 00               4      NOP
+       F8F4                     CHECK_IXL:
+0001ED F8F4 08               4      EX  AF,AF'
+0001EE F8F5 DD7D             9      LD  A,IXL
+0001F0 F8F7 FE20             7      CP  020H
+0001F2 F8F9 D21EFB          10      JP  NC,ISC_DEF
+0001F5 F8FC C3FCF3          10      JP  HOOK_DISKROM
                                 
-       F406                     ISC2_E:
-000102 4102                         ORG $$+RUN          ;$DEPHASE
-[EOF:MSXINIT.ASM:SHIFT_JIS]
+       F8FF                     ISC_F8_E:
+0001F8 41F8                         ORG $$+RUN          ;$DEPHASE
+                                
+       41F8                     AT_ISC_HOOK:
+0001F8 F3FC                         ORG ISC_HOOK,AT_ISC_HOOK-RUN
+                                ;   NOP
+       F3FC                     HOOK_DISKROM:
+0001F8 F3FC F1              10      POP AF
+0001F9 F3FD FD2600          10      LD  IYH,0
+       F3FF                     ROM_SLT EQU $-1
+0001FC F400 C31C00          10      JP  _CALSLT
+                                
+       F403                     ROM_MODE:
+0001FF F403 00                      DB  0
+       F404                     ROM8000H_H:
+000200 F404 00                      DB  0
+       F405                     B_DRIVE:
+000201 F405 00                      DB  0
+       F406                     ISC_HOOK_E:
+000202 4202                         ORG $$+RUN          ;$DEPHASE
+[EOF:MSXINIT.ASM:UTF_8]
                                     INCLUDE "MSXDISK.ASM"
                                 
                                 ;   Tablacus DISK ROM - DISK
@@ -211,302 +266,340 @@
                                 ;   ROM DISK DRIVER
                                 ;   1セクタ512
                                 
-       4102                     ERROR_WRITE_PROTECTED:
-000102 4102 3E00             7      LD  A,0     ;Write protected
-000104 4104 C9              10      RET
-       4105                     DISKIO:
-000105 4105 38FB            12      JR  C,ERROR_WRITE_PROTECTED
-000107 4107 48               4      LD  C,B
-000108 4108 E5              11      PUSH    HL
-       4109                     DISKIO1:
-000109 4109 C5              11      PUSH    BC
-00010A 410A D5              11      PUSH    DE
-00010B 410B F5              11      PUSH    AF      ;A=DRIVE
+       4202                     ERROR_WRITE_PROTECTED:
+000202 4202 3E00             7      LD  A,0     ;Write protected
+000204 4204 C9              10      RET
+       4205                     DISKIO:
+000205 4205 38FB            12      JR  C,ERROR_WRITE_PROTECTED
+000207 4207 48               4      LD  C,B
+000208 4208 E5              11      PUSH    HL
+       4209                     DISKIO1:
+000209 4209 C5              11      PUSH    BC
+00020A 420A D5              11      PUSH    DE
+00020B 420B F5              11      PUSH    AF      ;A=DRIVE
                                 
-00010C 410C E5              11      PUSH    HL
-00010D 410D CD8A42          17      CALL    MAPPING
-000110 4110 E1              10      POP HL      ;HLは読み出し先のメモリアドレス
+00020C 420C E5              11      PUSH    HL
+00020D 420D CDC743          17      CALL    MAPPING
+000210 4210 E1              10      POP HL      ;HLは読み出し先のメモリアドレス
                                 
-000111 4111 3A04F4          13      LD  A,(ROM_MODE)    ;セグメントのサイズでフィルタする(8K:1F/16K:3F)
-000114 4114 A3               4      AND E
-000115 4115 1E00             7      LD  E,0     ;DEはROMディスクから読み出すアドレス
-000117 4117 C680             7      ADD A,080H
-000119 4119 57               4      LD  D,A
+000211 4211 3A03F4          13      LD  A,(ROM_MODE)    ;セグメントのサイズでフィルタする(8K:1F/16K:3F)
+000214 4214 A3               4      AND E
+000215 4215 1E00             7      LD  E,0     ;DEはROMディスクから読み出すアドレス
+000217 4217 C680             7      ADD A,080H
+000219 4219 57               4      LD  D,A
                                 
-00011A 411A 010002          10      LD  BC,00200H   ;BCは読み出すセクタサイズ
+00021A 421A 010002          10      LD  BC,00200H   ;BCは読み出すセクタサイズ
                                 
-00011D 411D EB               4      EX  DE,HL
-       411E                     DISKIO2:
-00011E 411E C5              11      PUSH    BC
-00011F 411F D5              11      PUSH    DE
-000120 4120 E5              11      PUSH    HL
-000121 4121 3A00F4          13      LD  A,(ROM_SLT)
-000124 4124 CD0C00          17      CALL    _RDSLT
-000127 4127 E1              10      POP HL
-000128 4128 D1              10      POP DE
-000129 4129 C1              10      POP BC
-00012A 412A 12               7      LD  (DE),A
-00012B 412B 13               6      INC DE
-00012C 412C EDA1            16      CPI         ;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
-00012E 412E EA1E41          10      JP  PE,DISKIO2
+00021D 421D EB               4      EX  DE,HL
+       421E                     DISKIO2:
+00021E 421E C5              11      PUSH    BC
+00021F 421F D5              11      PUSH    DE
+000220 4220 E5              11      PUSH    HL
+000221 4221 3AFFF3          13      LD  A,(ROM_SLT)
+000224 4224 CD0C00          17      CALL    _RDSLT
+000227 4227 E1              10      POP HL
+000228 4228 D1              10      POP DE
+000229 4229 C1              10      POP BC
+00022A 422A 12               7      LD  (DE),A
+00022B 422B 13               6      INC DE
+00022C 422C EDA1            16      CPI         ;HL=HL+1 BC=BC-1 BCが0の場合にP/V=0
+00022E 422E EA1E42          10      JP  PE,DISKIO2
                                 
-000131 4131 EB               4      EX  DE,HL
-000132 4132 F1              10      POP AF
-000133 4133 D1              10      POP DE
-000134 4134 13               6      INC DE
-000135 4135 C1              10      POP BC
-000136 4136 10D1            13      DJNZ    DISKIO1
-000138 4138 41               4      LD  B,C
+000231 4231 EB               4      EX  DE,HL
+000232 4232 F1              10      POP AF
+000233 4233 D1              10      POP DE
+000234 4234 13               6      INC DE
+000235 4235 C1              10      POP BC
+000236 4236 10D1            13      DJNZ    DISKIO1
+000238 4238 41               4      LD  B,C
                                 
-000139 4139 E1              10      POP HL
+000239 4239 E1              10      POP HL
                                 
-00013A 413A AF               4      XOR A
-00013B 413B FB               4      EI
-00013C 413C C9              10      RET
+00023A 423A AF               4      XOR A
+00023B 423B FB               4      EI
+00023C 423C C9              10      RET
                                 
-       413D                     DSKCHG:
-00013D 413D 110000          10      LD  DE,0
-000140 4140 CD8A42          17      CALL    MAPPING
+       423D                     DSKCHG:
+00023D 423D 110000          10      LD  DE,0
+000240 4240 CDC743          17      CALL    MAPPING
                                 
-000143 4143 211580          10      LD  HL,08000H+21        ;BPB_Media  
-000146 4146 3A00F4          13      LD  A,(ROM_SLT)
-000149 4149 CD0C00          17      CALL    _RDSLT
-00014C 414C B7               4      OR  A
-00014D 414D 2804            12      JR  Z,NOTREADY
-00014F 414F AF               4      XOR A
-000150 4150 0601             7      LD  B,1
-000152 4152 C9              10      RET
-       4153                     NOTREADY:
-000153 4153 3E02             7      LD  A,2
-000155 4155 37               4      SCF
-000156 4156 C9              10      RET
+000243 4243 211580          10      LD  HL,08000H+21        ;BPB_Media  
+000246 4246 3AFFF3          13      LD  A,(ROM_SLT)
+000249 4249 CD0C00          17      CALL    _RDSLT
+00024C 424C B7               4      OR  A
+00024D 424D 2804            12      JR  Z,NOTREADY
+00024F 424F AF               4      XOR A
+000250 4250 0601             7      LD  B,1
+000252 4252 C9              10      RET
+       4253                     NOTREADY:
+000253 4253 3E02             7      LD  A,2
+000255 4255 37               4      SCF
+000256 4256 C9              10      RET
                                 
-       4157                     NO_BPB:
-000157 4157 E1              10      POP HL
-000158 4158 23               6      INC HL
-000159 4159 11B342          10      LD  DE,DPB2DD
-00015C 415C 011200          10      LD  BC,DPB2DD_E-DPB2DD
-00015F 415F EDB0                    LDIR
-000161 4161 AF               4      XOR A
-000162 4162 C9              10      RET
+       4257                     NO_BPB:
+000257 4257 E1              10      POP HL
+000258 4258 23               6      INC HL
+000259 4259 11F243          10      LD  DE,DPB2DD
+00025C 425C 011200          10      LD  BC,DPB2DD_E-DPB2DD
+00025F 425F EDB0                    LDIR
+000261 4261 AF               4      XOR A
+000262 4262 C9              10      RET
                                 
-       4163                     GETDPB:
-000163 4163 E5              11      PUSH    HL
-000164 4164 110000          10      LD  DE,0
-000167 4167 CD8A42          17      CALL    MAPPING
+       4263                     GETDPB:
+000263 4263 E5              11      PUSH    HL
+000264 4264 110000          10      LD  DE,0
+000267 4267 CDC743          17      CALL    MAPPING
                                 
-00016A 416A 211580          10      LD  HL,08000H+21        ;BPB_Media  
-00016D 416D 3A00F4          13      LD  A,(ROM_SLT)
-000170 4170 CD0C00          17      CALL    _RDSLT
-000173 4173 B7               4      OR  A
-000174 4174 28E1            12      JR  Z,NO_BPB
-000176 4176 DDE1            14      POP IX
-000178 4178 DD7701          19      LD  (IX+1),A        ;MEDIA
+00026A 426A 211580          10      LD  HL,08000H+21        ;BPB_Media  
+00026D 426D 3AFFF3          13      LD  A,(ROM_SLT)
+000270 4270 CD0C00          17      CALL    _RDSLT
+000273 4273 B7               4      OR  A
+000274 4274 28E1            12      JR  Z,NO_BPB
+000276 4276 DDE1            14      POP IX
+000278 4278 DD7701          19      LD  (IX+1),A        ;MEDIA
                                 
-00017B 417B DDE5            15      PUSH    IX
-00017D 417D 210B80          10      LD  HL,08000H+11        ;BPB_BytsPerSec 
-000180 4180 3A00F4          13      LD  A,(ROM_SLT)
-000183 4183 CD0C00          17      CALL    _RDSLT
-000186 4186 DDE1            14      POP IX
-000188 4188 DD7702          19      LD  (IX+2),A        ;SECSIZ LOW
+00027B 427B DDE5            15      PUSH    IX
+00027D 427D 210B80          10      LD  HL,08000H+11        ;BPB_BytsPerSec 
+000280 4280 3AFFF3          13      LD  A,(ROM_SLT)
+000283 4283 CD0C00          17      CALL    _RDSLT
+000286 4286 DDE1            14      POP IX
+000288 4288 DD7702          19      LD  (IX+2),A        ;SECSIZ LOW
                                 
-00018B 418B DDE5            15      PUSH    IX
-00018D 418D 210C80          10      LD  HL,08000H+12        ;BPB_BytsPerSec 
-000190 4190 3A00F4          13      LD  A,(ROM_SLT)
-000193 4193 CD0C00          17      CALL    _RDSLT
-000196 4196 DDE1            14      POP IX
-000198 4198 DD7703          19      LD  (IX+3),A        ;SECSIZ HIGH
+00028B 428B DDE5            15      PUSH    IX
+00028D 428D 210C80          10      LD  HL,08000H+12        ;BPB_BytsPerSec 
+000290 4290 3AFFF3          13      LD  A,(ROM_SLT)
+000293 4293 CD0C00          17      CALL    _RDSLT
+000296 4296 DDE1            14      POP IX
+000298 4298 DD7703          19      LD  (IX+3),A        ;SECSIZ HIGH
                                 
-00019B 419B 87               4      ADD A,A
-00019C 419C 87               4      ADD A,A
-00019D 419D 87               4      ADD A,A
-00019E 419E 3D               4      DEC A
-00019F 419F DD7704          19      LD  (IX+4),A        ;DIRMSK
+00029B 429B 87               4      ADD A,A
+00029C 429C 87               4      ADD A,A
+00029D 429D 87               4      ADD A,A
+00029E 429E 3D               4      DEC A
+00029F 429F DD7704          19      LD  (IX+4),A        ;DIRMSK
                                 
-0001A2 41A2 06FF             7      LD  B,-1
-0001A4 41A4 A7               4      AND A           ;無限ループ阻止
-       41A5                     GETDPB1:
-0001A5 41A5 04               4      INC B
-0001A6 41A6 1F               4      RRA
-0001A7 41A7 38FC            12      JR  C,GETDPB1
-0001A9 41A9 DD7005          19      LD  (IX+5),B        ;DIRSHFT
+0002A2 42A2 06FF             7      LD  B,-1
+0002A4 42A4 A7               4      AND A           ;無限ループ阻止
+       42A5                     GETDPB1:
+0002A5 42A5 04               4      INC B
+0002A6 42A6 1F               4      RRA
+0002A7 42A7 38FC            12      JR  C,GETDPB1
+0002A9 42A9 DD7005          19      LD  (IX+5),B        ;DIRSHFT
                                 
-0001AC 41AC DDE5            15      PUSH    IX
-0001AE 41AE 210D80          10      LD  HL,08000H+13        ;BPB_SecPerClus 
-0001B1 41B1 3A00F4          13      LD  A,(ROM_SLT)
-0001B4 41B4 CD0C00          17      CALL    _RDSLT
-0001B7 41B7 DDE1            14      POP IX
-0001B9 41B9 3D               4      DEC A
-0001BA 41BA DD7706          19      LD  (IX+6),A        ;CLUSMSK
+0002AC 42AC DDE5            15      PUSH    IX
+0002AE 42AE 210D80          10      LD  HL,08000H+13        ;BPB_SecPerClus 
+0002B1 42B1 3AFFF3          13      LD  A,(ROM_SLT)
+0002B4 42B4 CD0C00          17      CALL    _RDSLT
+0002B7 42B7 DDE1            14      POP IX
+0002B9 42B9 3D               4      DEC A
+0002BA 42BA DD7706          19      LD  (IX+6),A        ;CLUSMSK
                                 
-0001BD 41BD A7               4      AND A           ;無限ループ阻止
-0001BE 41BE 06FF             7      LD  B,-1
-       41C0                     GETDPB2:
-0001C0 41C0 04               4      INC B
-0001C1 41C1 1F               4      RRA
-0001C2 41C2 38FC            12      JR  C,GETDPB2
-0001C4 41C4 04               4      INC B
-0001C5 41C5 DD7007          19      LD  (IX+7),B        ;CLUSSHFT
+0002BD 42BD A7               4      AND A           ;無限ループ阻止
+0002BE 42BE 06FF             7      LD  B,-1
+       42C0                     GETDPB2:
+0002C0 42C0 04               4      INC B
+0002C1 42C1 1F               4      RRA
+0002C2 42C2 38FC            12      JR  C,GETDPB2
+0002C4 42C4 04               4      INC B
+0002C5 42C5 DD7007          19      LD  (IX+7),B        ;CLUSSHFT
                                 
-0001C8 41C8 DDE5            15      PUSH    IX
-0001CA 41CA 210E80          10      LD  HL,08000H+14        ;BPB_RsvdSecCnt 
-0001CD 41CD 3A00F4          13      LD  A,(ROM_SLT)
-0001D0 41D0 CD0C00          17      CALL    _RDSLT
-0001D3 41D3 DDE1            14      POP IX
-0001D5 41D5 DD7708          19      LD  (IX+8),A        ;FIRFAT LOW
+0002C8 42C8 DDE5            15      PUSH    IX
+0002CA 42CA 210E80          10      LD  HL,08000H+14        ;BPB_RsvdSecCnt 
+0002CD 42CD 3AFFF3          13      LD  A,(ROM_SLT)
+0002D0 42D0 CD0C00          17      CALL    _RDSLT
+0002D3 42D3 DDE1            14      POP IX
+0002D5 42D5 DD7708          19      LD  (IX+8),A        ;FIRFAT LOW
                                 
-0001D8 41D8 DDE5            15      PUSH    IX
-0001DA 41DA 210F80          10      LD  HL,08000H+15        ;BPB_RsvdSecCnt 
-0001DD 41DD 3A00F4          13      LD  A,(ROM_SLT)
-0001E0 41E0 CD0C00          17      CALL    _RDSLT
-0001E3 41E3 DDE1            14      POP IX
-0001E5 41E5 DD7709          19      LD  (IX+9),A        ;FIRFAT HIGH
+0002D8 42D8 DDE5            15      PUSH    IX
+0002DA 42DA 210F80          10      LD  HL,08000H+15        ;BPB_RsvdSecCnt 
+0002DD 42DD 3AFFF3          13      LD  A,(ROM_SLT)
+0002E0 42E0 CD0C00          17      CALL    _RDSLT
+0002E3 42E3 DDE1            14      POP IX
+0002E5 42E5 DD7709          19      LD  (IX+9),A        ;FIRFAT HIGH
                                 
-0001E8 41E8 DDE5            15      PUSH    IX
-0001EA 41EA 211080          10      LD  HL,08000H+16        ;BPB_NumFATs    
-0001ED 41ED 3A00F4          13      LD  A,(ROM_SLT)
-0001F0 41F0 CD0C00          17      CALL    _RDSLT
-0001F3 41F3 DDE1            14      POP IX
-0001F5 41F5 DD770A          19      LD  (IX+10),A       ;FATCNT
+0002E8 42E8 DDE5            15      PUSH    IX
+0002EA 42EA 211080          10      LD  HL,08000H+16        ;BPB_NumFATs    
+0002ED 42ED 3AFFF3          13      LD  A,(ROM_SLT)
+0002F0 42F0 CD0C00          17      CALL    _RDSLT
+0002F3 42F3 DDE1            14      POP IX
+0002F5 42F5 DD770A          19      LD  (IX+10),A       ;FATCNT
                                 
-0001F8 41F8 DDE5            15      PUSH    IX
-0001FA 41FA 211180          10      LD  HL,08000H+17        ;BPB_RootEntCnt 
-0001FD 41FD 3A00F4          13      LD  A,(ROM_SLT)
-000200 4200 CD0C00          17      CALL    _RDSLT
-000203 4203 DDE1            14      POP IX
-000205 4205 DD770B          19      LD  (IX+11),A       ;FATCNT
+0002F8 42F8 DDE5            15      PUSH    IX
+0002FA 42FA 211180          10      LD  HL,08000H+17        ;BPB_RootEntCnt 
+0002FD 42FD 3AFFF3          13      LD  A,(ROM_SLT)
+000300 4300 CD0C00          17      CALL    _RDSLT
+000303 4303 DDE1            14      POP IX
+000305 4305 DD770B          19      LD  (IX+11),A       ;FATCNT
                                 
-000208 4208 DDE5            15      PUSH    IX
-00020A 420A 211680          10      LD  HL,08000H+22        ;BPB_FATSz16    
-00020D 420D 3A00F4          13      LD  A,(ROM_SLT)
-000210 4210 CD0C00          17      CALL    _RDSLT
-000213 4213 DDE1            14      POP IX
-000215 4215 DD7710          19      LD  (IX+16),A       ;FATSIZ
+000308 4308 DDE5            15      PUSH    IX
+00030A 430A 211680          10      LD  HL,08000H+22        ;BPB_FATSz16    
+00030D 430D 3AFFF3          13      LD  A,(ROM_SLT)
+000310 4310 CD0C00          17      CALL    _RDSLT
+000313 4313 DDE1            14      POP IX
+000315 4315 DD7710          19      LD  (IX+16),A       ;FATSIZ
                                 
-000218 4218 6F               4      LD  L,A         ;FATSIZ
-000219 4219 2600             7      LD  H,0
-00021B 421B DD7E0A          19      LD  A,(IX+10)       ;FATCNT
-       421E                     GETDPB3:
-00021E 421E 3D               4      DEC A
-00021F 421F 2803            12      JR  Z,GETDPB4
-000221 4221 29              11      ADD HL,HL
-000222 4222 18FA            12      JR  GETDPB3
-       4224                     GETDPB4:
-000224 4224 DD4E08          19      LD  C,(IX+8)        ;FIRFAT
-000227 4227 DD4609          19      LD  B,(IX+9)        ;FIRFAT
-00022A 422A 09              11      ADD HL,BC
-00022B 422B DD7511          19      LD  (IX+17),L       ;FIRDIR
-00022E 422E DD7412          19      LD  (IX+18),H       ;FIRDIR
+000318 4318 6F               4      LD  L,A         ;FATSIZ
+000319 4319 2600             7      LD  H,0
+00031B 431B DD7E0A          19      LD  A,(IX+10)       ;FATCNT
+       431E                     GETDPB3:
+00031E 431E 3D               4      DEC A
+00031F 431F 2803            12      JR  Z,GETDPB4
+000321 4321 29              11      ADD HL,HL
+000322 4322 18FA            12      JR  GETDPB3
+       4324                     GETDPB4:
+000324 4324 DD4E08          19      LD  C,(IX+8)        ;FIRFAT
+000327 4327 DD4609          19      LD  B,(IX+9)        ;FIRFAT
+00032A 432A 09              11      ADD HL,BC
+00032B 432B DD7511          19      LD  (IX+17),L       ;FIRDIR
+00032E 432E DD7412          19      LD  (IX+18),H       ;FIRDIR
                                 
-000231 4231 DD7E03          19      LD  A,(IX+3)        ;SECSIZ HIGH
-000234 4234 DD5E0B          19      LD  E,(IX+11)       ;MAXENT
-000237 4237 CB3B             8      SRL E
-000239 4239 CB3B             8      SRL E
-       423B                     GETDPB5:
-00023B 423B CB3B             8      SRL E
-00023D 423D 37               4      SCF             ;無限ループ阻止
-00023E 423E 1F               4      RRA
-00023F 423F 30FA            12      JR  NC,GETDPB5
-000241 4241 1600             7      LD  D,0
-000243 4243 19              11      ADD HL,DE
-000244 4244 DD750C          19      LD  (IX+12),L       ;FIRREC
-000247 4247 DD740D          19      LD  (IX+13),H       ;FIRREC
+000331 4331 3E08             7      LD  A,2*4           ;SECSIZ HIGH
+000333 4333 DD5E0B          19      LD  E,(IX+11)       ;MAXENT
+       4336                     GETDPB5:
+000336 4336 CB3B             8      SRL E
+000338 4338 1F               4      RRA
+000339 4339 30FB            12      JR  NC,GETDPB5
+00033B 433B 1600             7      LD  D,0
+00033D 433D 19              11      ADD HL,DE
+00033E 433E DD750C          19      LD  (IX+12),L       ;FIRREC
+000341 4341 DD740D          19      LD  (IX+13),H       ;FIRREC
                                 
-00024A 424A DDE5            15      PUSH    IX
-00024C 424C 211480          10      LD  HL,08000H+20        ;BPB_TotSec16   
-00024F 424F 3A00F4          13      LD  A,(ROM_SLT)
-000252 4252 CD0C00          17      CALL    _RDSLT
-000255 4255 F5              11      PUSH    AF
-000256 4256 211380          10      LD  HL,08000H+19        ;BPB_TotSec16   
-000259 4259 3A00F4          13      LD  A,(ROM_SLT)
-00025C 425C CD0C00          17      CALL    _RDSLT
-00025F 425F E1              10      POP HL
-000260 4260 6F               4      LD  L,A         ;HL=TotSec16
-000261 4261 DDE1            14      POP IX
+000344 4344 DDE5            15      PUSH    IX
+000346 4346 211480          10      LD  HL,08000H+20        ;BPB_TotSec16   
+000349 4349 3AFFF3          13      LD  A,(ROM_SLT)
+00034C 434C CD0C00          17      CALL    _RDSLT
+00034F 434F F5              11      PUSH    AF
+000350 4350 211380          10      LD  HL,08000H+19        ;BPB_TotSec16   
+000353 4353 3AFFF3          13      LD  A,(ROM_SLT)
+000356 4356 CD0C00          17      CALL    _RDSLT
+000359 4359 E1              10      POP HL
+00035A 435A 6F               4      LD  L,A         ;HL=TotSec16
+00035B 435B DDE1            14      POP IX
                                 
-000263 4263 DD4E0C          19      LD  C,(IX+12)       ;FIRREC
-000266 4266 DD460D          19      LD  B,(IX+13)       ;FIRREC
-000269 4269 A7               4      AND A
-00026A 426A ED42            15      SBC HL,BC
+00035D 435D DD4E0C          19      LD  C,(IX+12)       ;FIRREC
+000360 4360 DD460D          19      LD  B,(IX+13)       ;FIRREC
+000363 4363 A7               4      AND A
+000364 4364 ED42            15      SBC HL,BC
                                 
-00026C 426C DD7E06          19      LD  A,(IX+6)        ;CLUSMSK
-00026F 426F 3C               4      INC A
-000270 4270 37               4      SCF             ;無限ループ阻止
-       4271                     GETDPB6:
-000271 4271 1F               4      RRA
-000272 4272 3806            12      JR  C,GETDPB7
-000274 4274 CB3C             8      SRL H
-000276 4276 CB1D             8      RR  L
-000278 4278 18F7            12      JR  GETDPB6
-       427A                     GETDPB7:
-00027A 427A 23               6      INC HL
-00027B 427B DD750E          19      LD  (IX+14),L       ;MAXCLUS
-00027E 427E DD740F          19      LD  (IX+15),H       ;MAXCLUS
-000281 4281 AF               4      XOR A
-000282 4282 C9              10      RET
+000366 4366 DD7E06          19      LD  A,(IX+6)        ;CLUSMSK
+000369 4369 3C               4      INC A
+00036A 436A 37               4      SCF             ;無限ループ阻止
+       436B                     GETDPB6:
+00036B 436B 1F               4      RRA
+00036C 436C 3806            12      JR  C,GETDPB7
+00036E 436E CB3C             8      SRL H
+000370 4370 CB1D             8      RR  L
+000372 4372 18F7            12      JR  GETDPB6
+       4374                     GETDPB7:
+000374 4374 23               6      INC HL
+000375 4375 DD750E          19      LD  (IX+14),L       ;MAXCLUS
+000378 4378 DD740F          19      LD  (IX+15),H       ;MAXCLUS
                                 
-       4283                     CHOICE:
-000283 4283 210000          10      LD  HL,0
-000286 4286 C9              10      RET
+                                    ;1セクタが512バイト以上の場合を考慮(2HD/1セクタ1024バイト/1.23MB等)
+       437B                     GETDPBD1:
+00037B 437B DD7E03          19      LD  A,(IX+3)        ;SECSIZ HIGH
+00037E 437E E6FC             7      AND 0FCH
+000380 4380 C8              11      RET Z
                                 
-       4287                     DSKFMT:
-000287 4287 AF               4      XOR A
-000288 4288 37               4      SCF
-       4289                     DSKSTP:
-000289 4289 C9              10      RET
+000381 4381 DDCB033E        23      SRL (IX+3)          ;SECSIZ HIGH
                                 
-       428A                     MAPPING:
-00028A 428A EB               4      EX  DE,HL
-00028B 428B 29              11      ADD HL,HL
-00028C 428C E5              11      PUSH    HL  ;あとでDEで受け取る
-00028D 428D 29              11      ADD HL,HL   ;64KB→32KB
-00028E 428E 29              11      ADD HL,HL   ;32KB→16KB
+000385 4385 37               4      SCF
+000386 4386 DDCB0616        23      RL  (IX+6)          ;CLUSMSK
                                 
-00028F 428F C5              11      PUSH    BC
-000290 4290 3C               4      INC A
-000291 4291 47               4      LD  B,A
-000292 4292 3A04F4          13      LD  A,(ROM_MODE)
-000295 4295 E620             7      AND 020H
-000297 4297 4F               4      LD  C,A
-000298 4298 3ED4             7      LD  A,-44           ;16KB単位でカートリッジ内のディスクが存在する位置を指定
-       429A                     SETMAP1:
-00029A 429A C62D             7      ADD A,45            ;720KB/16KB
-00029C 429C 10FC            13      DJNZ    SETMAP1
-00029E 429E 0C               4      INC C
-00029F 429F 0D               4      DEC C
-0002A0 42A0 C1              10      POP BC
-0002A1 42A1 2002            12      JR  NZ,ASCII16K1
-0002A3 42A3 29              11      ADD HL,HL   ;16KB→8KB  ;ASCII-16Kの場合はこの処理を飛ばす
-0002A4 42A4 87               4      ADD A,A
-       42A5                     ASCII16K1:
-0002A5 42A5 84               4      ADD A,H
-0002A6 42A6 5F               4      LD  E,A
-0002A7 42A7 3A05F4          13      LD  A,(ROM8000H_H)
-0002AA 42AA 67               4      LD  H,A
-0002AB 42AB 3A00F4          13      LD  A,(ROM_SLT)
-0002AE 42AE CD1400          17      CALL    _WRSLT
+00038A 438A DD3407          23      INC (IX+7)          ;CLUSSHFT
                                 
-0002B1 42B1 D1              10      POP DE
-0002B2 42B2 C9              10      RET
+00038D 438D DDCB0826        23      SLA (IX+8)          ;FIRFAT LOW
+000391 4391 DDCB0916        23      RL  (IX+9)          ;FIRFAT HIGH
                                 
-       42B3                     DPB2DD:
-0002B3 42B3 F9                      DB  0F9H    ;MEDIA
-0002B4 42B4 0002                    DW  00200H  ;SECSIZ
-0002B6 42B6 0F                      DB  00FH    ;DIRMSK
-0002B7 42B7 04                      DB  004H    ;DIRSHFT
-0002B8 42B8 01                      DB  001H    ;CLUSMSK
-0002B9 42B9 02                      DB  002H    ;CLUSSHFT
-0002BA 42BA 0100                    DW  00001H  ;FIRFAT
-0002BC 42BC 02                      DB  002H    ;FATCNT
-0002BD 42BD 70                      DB  070H    ;MAXENT
-0002BE 42BE 0E00                    DW  0000EH  ;FIRREC
-0002C0 42C0 CA02                    DW  002CAH  ;MAXCLUS
-0002C2 42C2 03                      DB  003H    ;FATSIZ
-0002C3 42C3 0700                    DW  0007H   ;FIRDIR
-       42C5                     DPB2DD_E:
+000395 4395 DDCB1026        23      SLA (IX+16)         ;FATSIZ
+                                
+000399 4399 DDCB1126        23      SLA (IX+17)         ;FIRDIR
+00039D 439D DDCB1216        23      RL  (IX+18)         ;FIRDIR
+                                
+0003A1 43A1 DD6E11          19      LD  L,(IX+17)       ;FIRDIR
+0003A4 43A4 DD6612          19      LD  H,(IX+18)       ;FIRDIR
+                                
+0003A7 43A7 3E08             7      LD  A,2*4           ;SECSIZ HIGH
+0003A9 43A9 DD5E0B          19      LD  E,(IX+11)       ;MAXENT
+       43AC                     GETDPBD5:
+0003AC 43AC CB3B             8      SRL E
+0003AE 43AE 1F               4      RRA
+0003AF 43AF 30FB            12      JR  NC,GETDPBD5
+0003B1 43B1 1600             7      LD  D,0
+0003B3 43B3 19              11      ADD HL,DE
+0003B4 43B4 DD750C          19      LD  (IX+12),L       ;FIRREC
+0003B7 43B7 DD740D          19      LD  (IX+13),H       ;FIRREC
+                                
+0003BA 43BA 18BF            12      JR  GETDPBD1
+                                
+       43BC                     CHOICE:
+0003BC 43BC 210000          10      LD  HL,0
+0003BF 43BF C9              10      RET
+                                
+       43C0                     DSKFMT:
+0003C0 43C0 AF               4      XOR A
+0003C1 43C1 37               4      SCF
+       43C2                     DSKSTP:
+       43C2                     BASENT:
+0003C2 43C2 C9              10      RET
+                                
+       43C3                     GETSLT:
+0003C3 43C3 3AFFF3          13      LD  A,(ROM_SLT)
+0003C6 43C6 C9              10      RET
+                                
+       43C7                     MAPPING:
+0003C7 43C7 EB               4      EX  DE,HL
+0003C8 43C8 29              11      ADD HL,HL
+0003C9 43C9 E5              11      PUSH    HL  ;あとでDEで受け取る
+0003CA 43CA 29              11      ADD HL,HL   ;64KB→32KB
+0003CB 43CB 29              11      ADD HL,HL   ;32KB→16KB
+                                
+0003CC 43CC C5              11      PUSH    BC
+0003CD 43CD 3C               4      INC A
+0003CE 43CE 47               4      LD  B,A
+0003CF 43CF 3A03F4          13      LD  A,(ROM_MODE)
+0003D2 43D2 E620             7      AND 020H
+0003D4 43D4 4F               4      LD  C,A
+0003D5 43D5 3E01             7      LD  A,1
+0003D7 43D7 05               4      DEC B
+0003D8 43D8 2803            12      JR  Z,SETMAP1
+0003DA 43DA 3A05F4          13      LD  A,(B_DRIVE)
+       43DD                     SETMAP1:                ;A=16KB単位でカートリッジ内のディスクが存在する位置を指定
+0003DD 43DD 0C               4      INC C
+0003DE 43DE 0D               4      DEC C
+0003DF 43DF C1              10      POP BC
+0003E0 43E0 2002            12      JR  NZ,ASCII16K1
+0003E2 43E2 29              11      ADD HL,HL   ;16KB→8KB  ;ASCII-16Kの場合はこの処理を飛ばす
+0003E3 43E3 87               4      ADD A,A
+       43E4                     ASCII16K1:
+0003E4 43E4 84               4      ADD A,H
+0003E5 43E5 5F               4      LD  E,A
+0003E6 43E6 3A04F4          13      LD  A,(ROM8000H_H)
+0003E9 43E9 67               4      LD  H,A
+0003EA 43EA 3AFFF3          13      LD  A,(ROM_SLT)
+0003ED 43ED CD1400          17      CALL    _WRSLT
+                                
+0003F0 43F0 D1              10      POP DE
+0003F1 43F1 C9              10      RET
+                                
+       43F2                     DPB2DD:
+0003F2 43F2 F9                      DB  0F9H    ;MEDIA
+0003F3 43F3 0002                    DW  00200H  ;SECSIZ
+0003F5 43F5 0F                      DB  00FH    ;DIRMSK
+0003F6 43F6 04                      DB  004H    ;DIRSHFT
+0003F7 43F7 01                      DB  001H    ;CLUSMSK
+0003F8 43F8 02                      DB  002H    ;CLUSSHFT
+0003F9 43F9 0100                    DW  00001H  ;FIRFAT
+0003FB 43FB 02                      DB  002H    ;FATCNT
+0003FC 43FC 70                      DB  070H    ;MAXENT
+0003FD 43FD 0E00                    DW  0000EH  ;FIRREC
+0003FF 43FF CA02                    DW  002CAH  ;MAXCLUS
+000401 4401 03                      DB  003H    ;FATSIZ
+000402 4402 0700                    DW  0007H   ;FIRDIR
+       4404                     DPB2DD_E:
 [EOF:MSXDISK.ASM:UTF_8]
                                 
-0002C5 42C5                         DS  07FFFH-$
+000404 4404                         DS  07FFFH-$
 003FFF 7FFF 00                      DB  0
        8000                     LAST_ADR:
                                 
