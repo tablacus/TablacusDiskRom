@@ -16,7 +16,7 @@
 ;
 ;	■アセンブル時にドライブAのFDDのサイズを指定する(Bドライブも使用する場合)
 ;	2DDの場合
-	FIX_DRIVE	EQU	720/16+1
+;	FIX_DRIVE	EQU	720/16+1
 ;
 
 	INCLUDE	"MSXDEF.ASM"
