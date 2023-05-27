@@ -41,12 +41,12 @@ copy /b DISKROM.BIN + DISK1.DSK + DISK2.dsk DISK1_2.ROM
 
 Tablacus DISK ROMオフ
 ```basic
-POKE &HF390,PEEK(&HF348)
+POKE &HFB22,PEEK(&HF348)
 ```
 
 Tablacus DISK ROMオン
 ```basic
-POKE &HF390,PEEK(&HFB1C)
+POKE &HFB22,PEEK(&HFB1C)
 ```
 
 ## ライセンス

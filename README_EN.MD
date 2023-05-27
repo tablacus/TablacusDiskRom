@@ -40,12 +40,12 @@ copy /b DISKROM.BIN + DISK1.DSK + DISK2.dsk DISK1_2.ROM
 
 Turn off Tablacus DISK ROM
 ```basic
-POKE &HF390,PEEK(&HF348)
+POKE &HFB22,PEEK(&HF348)
 ```
 
 Turn on Tablacus DISK ROM
 ```basic
-POKE &HF390,PEEK(&HFB1C)
+POKE &HFB22,PEEK(&HFB1C)
 ```
 
 ## License
