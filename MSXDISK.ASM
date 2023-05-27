@@ -20,7 +20,12 @@ DISKIO1:
 	CALL	MAPPING
 	POP	HL		;HLは読み出し先のメモリアドレス
 
+#if exists FIX_ROM_MODE
+	LD	A,FIX_ROM_MODE
+#else
 	LD	A,(ROM_MODE)	;セグメントのサイズでフィルタする(8K:1F/16K:3F)
+	AND	03FH
+#endif
 	AND	E
 	LD	E,0		;DEはROMディスクから読み出すアドレス
 	ADD	A,080H
@@ -33,7 +38,7 @@ DISKIO2:
 	PUSH	BC
 	PUSH	DE
 	PUSH	HL
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	POP	HL
 	POP	DE
@@ -62,7 +67,7 @@ DSKCHG:
 	CALL	MAPPING
 
 	LD	HL,08000H+21		;BPB_Media	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	OR	A
 	JR	Z,NOTREADY
@@ -89,7 +94,7 @@ GETDPB:
 	CALL	MAPPING
 
 	LD	HL,08000H+21		;BPB_Media	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	OR	A
 	JR	Z,NO_BPB
@@ -98,14 +103,14 @@ GETDPB:
 
 	PUSH	IX
 	LD	HL,08000H+11		;BPB_BytsPerSec	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	POP	IX
 	LD	(IX+2),A		;SECSIZ LOW
 
 	PUSH	IX
 	LD	HL,08000H+12		;BPB_BytsPerSec	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	POP	IX
 	LD	(IX+3),A		;SECSIZ HIGH
@@ -126,7 +131,7 @@ GETDPB1:
 
 	PUSH	IX
 	LD	HL,08000H+13		;BPB_SecPerClus	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	POP	IX
 	DEC	A
@@ -143,35 +148,35 @@ GETDPB2:
 
 	PUSH	IX
 	LD	HL,08000H+14		;BPB_RsvdSecCnt	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	POP	IX
 	LD	(IX+8),A		;FIRFAT LOW
 
 	PUSH	IX
 	LD	HL,08000H+15		;BPB_RsvdSecCnt	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	POP	IX
 	LD	(IX+9),A		;FIRFAT HIGH
 
 	PUSH	IX
 	LD	HL,08000H+16		;BPB_NumFATs	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	POP	IX
 	LD	(IX+10),A		;FATCNT
 
 	PUSH	IX
 	LD	HL,08000H+17		;BPB_RootEntCnt	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	POP	IX
 	LD	(IX+11),A		;FATCNT
 
 	PUSH	IX
 	LD	HL,08000H+22		;BPB_FATSz16	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	POP	IX
 	LD	(IX+16),A		;FATSIZ
@@ -204,11 +209,11 @@ GETDPB5:
 
 	PUSH	IX
 	LD	HL,08000H+20		;BPB_TotSec16	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	PUSH	AF
 	LD	HL,08000H+19		;BPB_TotSec16	
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	CALL	_RDSLT
 	POP	HL
 	LD	L,A			;HL=TotSec16
@@ -282,7 +287,7 @@ BASENT:
 	RET
 
 GETSLT:
-	LD	A,(ROM_SLT)
+	LD	A,(DRVTBL+1)
 	RET
 
 MAPPING:
@@ -291,17 +296,31 @@ MAPPING:
 	PUSH	HL	;あとでDEで受け取る
 	ADD	HL,HL	;64KB→32KB
 	ADD	HL,HL	;32KB→16KB
+	CALL	MAPPING1
+	LD	A,(DRVTBL+1)
+	CALL	_WRSLT
 
+	POP	DE
+	RET
+MAPPING1:
 	PUSH	BC
 	INC	A
 	LD	B,A
-	LD	A,(ROM_MODE)
+#if exists FIX_ROM_MODE
+	LD	A,FIX_ROM_MODE
+#else
+	LD	A,(ROM_MODE)	;セグメントのサイズでフィルタする(8K:1F/16K:3F)
+#endif
 	AND	020H
 	LD	C,A
 	LD	A,1
 	DEC	B
 	JR	Z,SETMAP1
+#if exists FIX_DRIVE
+	LD	A,FIX_DRIVE
+#else
 	LD	A,(B_DRIVE)
+#endif
 SETMAP1:				;A=16KB単位でカートリッジ内のディスクが存在する位置を指定
 	INC	C
 	DEC	C
@@ -312,12 +331,12 @@ SETMAP1:				;A=16KB単位でカートリッジ内のディスクが存在する�
 ASCII16K1:
 	ADD	A,H
 	LD	E,A
-	LD	A,(ROM8000H_H)
+#if exists FIX_ROM_SEL
+	LD	A,FIX_ROM_SEL
+#else
+	LD	A,(ROM_SEL)
+#endif
 	LD	H,A
-	LD	A,(ROM_SLT)
-	CALL	_WRSLT
-
-	POP	DE
 	RET
 
 DPB2DD:

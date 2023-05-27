@@ -1,20 +1,21 @@
 [Japanese/日本語](https://github.com/tablacus/TablacusDiskRom/blob/main/README.MD)
 
+# Tabacus DISK ROM for MSX Gaku
 
-Tabacus DISK ROM for MSX Gaku
+## Overview of features
 
-# Overview of features
-
-This software is a software that converts MSX’s DISK environment software to ROM. As a trick, it hooks the inter-slot call CALSLT and replaces low-level disk access with ROM disk. It uses the work area of RS-232C and cassette parameters and function key string storage area to hook the inter-slot call CALSLT. Software that uses RS-232C or cassette or changes function keys may not work. 
+This software is a software that converts MSX DISK environment software to ROM.  
+After starting ROM, it rewrites the slot used by DRVTBL and replaces low-level disk access with ROM disk.  
+It uses the RS-232C work area. Software that uses RS-232C may not work.
 
 Unlike [LSX-Dodgers](https://github.com/tablacus/LSX-Dodgers), you can ROMize BASIC software, but only on MSX with DISK BIOS. LSX-Dodgers can work on C-BIOS
 
-# Download
+## Download
 
 You can download it from Assets on the following page.   
 https://github.com/tablacus/TablacusDiskRom/releases
 
-# How to ROMize DSK files
+## How to ROMize DSK files
 
 1. Run `msxcat.bat` on Windows command line to concatenate system and disk image `ROM.DSK`
 
@@ -29,29 +30,29 @@ Example of concatenating two image files on Windows command line
 copy /b DISKROM.BIN + DISK1.DSK + DISK2.dsk DISK1_2.ROM
 ```
 
-# How to run
+## How to run
 
 1. Set `MSX.ROM` in ROM slot
 2. Set ROM image type to either `ASCII-16K`, `ASCII-8K` (only for 2MB or less), or `Konami-8K` (only for 512MB or less)
 3. Reset if it does not start
 
-# Switch
+## Switch
 
 Turn off Tablacus DISK ROM
 ```basic
-poke &hf390,&h98:poke &hf391,&hf3
+POKE &HF390,PEEK(&HF348)
 ```
 
 Turn on Tablacus DISK ROM
 ```basic
-poke &hf390,&h03:poke &hf391,&hfb
+POKE &HF390,PEEK(&HFB1C)
 ```
 
-# License
+## License
 
 [MIT License](https://github.com/tablacus/TablacusDiskRom/blob/main/LICENSE.TXT)
 
-# Special thanks
+## Special thanks
 
 Thanks to [HRA!](https://twitter.com/thara1129)'s MSX Memory Architecture, I was able to support MegaROM.
 I really appreciate it.
