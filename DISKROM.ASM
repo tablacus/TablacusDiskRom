@@ -2,21 +2,10 @@
 ;	Programmed by
 ;	Gaku (Lovers/Tablacus)
 ;
-;	■アセンブル時にROMのタイプを指定する1
-;	ASCII-8K/Konami-8Kの場合
-;	FIX_ROM_MODE	EQU	01FH
-;	ASCII-16Kの場合
-;	FIX_ROM_MODE	EQU	03FH
-;
-;	■アセンブル時にROMのタイプを指定する2
-;	ASCII-8K/ASCII-16Kの場合
-;	FIX_ROM_SEL	EQU	high BANK2_SEL
-;	Konami-8Kの場合
-;	FIX_ROM_SEL	EQU	high KONAMI_BANK2_SEL
 ;
 ;	■アセンブル時にドライブAのFDDのサイズを指定する(Bドライブも使用する場合)
 ;	2DDの場合
-;	FIX_DRIVE	EQU	720/16+1
+;	FIX_DRIVE	EQU	720/8+2
 ;
 
 	INCLUDE	"MSXDEF.ASM"
@@ -49,7 +38,7 @@
 	ORG	0407FH
 	RET
 ; Version
-	DB	"Tablacus DISK ROM v0.1.0.0",0
+	DB	"Tablacus DISK ROM v0.2.0.0",0
 
 	ORG	040FFH
 	RET

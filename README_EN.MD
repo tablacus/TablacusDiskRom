@@ -33,7 +33,7 @@ copy /b DISKROM.BIN + DISK1.DSK + DISK2.dsk DISK1_2.ROM
 ## How to run
 
 1. Set `MSX.ROM` in ROM slot
-2. Set ROM image type to either `ASCII-16K`, `ASCII-8K` (only for 2MB or less), or `Konami-8K` (only for 512MB or less)
+2. Set ROM image type to either `ASCII-8K` (only for 2MB or less), or `Konami-8K` (only for 512MB or less)
 3. Reset if it does not start
 
 ## Switch
