@@ -10,6 +10,8 @@ RS-232Cのワークエリアを使用しています。RS-232Cを変更するソ
 
 [LSX-Dodgers](https://github.com/tablacus/LSX-Dodgers)と違ってBASICのソフトをROM化することができますが、DISK BIOSが入っているMSXに限ります。LSX-DodgersはC-BIOSでも動作可能
 
+[Tabacus DISK ROM Lite](https://github.com/tablacus/TablacusDiskRomLite)はBASIC専用ですが、DISK BIOSが入っていないMSXでも動作します。
+
 ROM DISKが1枚の場合はAドライブがROM DISKにBドライブがフロッピーのAドライブになります。
 
 ## ダウンロード
