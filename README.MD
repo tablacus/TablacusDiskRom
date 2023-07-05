@@ -23,11 +23,11 @@ https://github.com/tablacus/TablacusDiskRom/releases
 
 1. Windowsのコマンドラインで`msxcat.bat`を実行してシステムとディスクイメージ`ROM.DSK`を連結する
 
-※DISKROM.BIN(16KB)の後ろに2DDのDSKファイルを連結しさえすればやり方は何を使ってもOKです。
+※DISKROM.BIN(8KB)の後ろに2DDのDSKファイルを連結しさえすればやり方は何を使ってもOKです。
 
 2DDの２枚組をROM化する事もできます。誑かしているだけなので２ドライブ使うには２ドライブマシンに限るのかと思いましたが、エミュレータフロッピー１台にしても２枚目をBドライブとして見ることができました。
 
-1. DISKROM.BIN(16KB)の後ろに2DDのDSKファイルを2つ連結してください。
+1. DISKROM.BIN(8KB)の後ろに2DDのDSKファイルを2つ連結してください。
 
 Windowsのコマンドラインで２枚のイメージファイルを連結する例
 ```bat

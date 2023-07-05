@@ -38,7 +38,7 @@
 	ORG	0407FH
 	RET
 ; Version
-	DB	"Tablacus DISK ROM v0.2.1.0",0
+	DB	"Tablacus DISK ROM v0.2.2.0",0
 
 	ORG	040FFH
 	RET
@@ -46,7 +46,7 @@
 	INCLUDE	"MSXINIT.ASM"
 	INCLUDE	"MSXDISK.ASM"
 
-	DS	07FFFH-$
+	DS	05FFFH-$
 	DB	0
 LAST_ADR:
 

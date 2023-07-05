@@ -46,7 +46,7 @@
        A000                     KONAMI_BANK3_SEL EQU    0A000H  ;A000-BFFF
                                 
        FB03                     ISC EQU RSTMP
-       0002                     DISK_BANK   EQU 2       ;ドライブAが始まるバンク#
+       0001                     DISK_BANK   EQU 1       ;ドライブAが始まるバンク#
        6000                     BANK1_ADR   EQU 06000H  ;バンク1の開始アドレス
 [EOF:MSXDEF.ASM:UTF_8]
                                 
@@ -78,9 +78,9 @@
 00007F 407F                         ORG 0407FH
 00007F 407F C9              10      RET
                                 ; Version
-000080 4080 5461626C61637573        DB  "Tablacus DISK ROM v0.2.1.0",0
+000080 4080 5461626C61637573        DB  "Tablacus DISK ROM v0.2.2.0",0
             204449534B20524F    
-            4D2076302E322E31    
+            4D2076302E322E32    
             2E3000              
                                 
 0000FF 40FF                         ORG 040FFH
@@ -109,7 +109,7 @@
 00011B 411B 3A0060          13      LD  A,(BANK1_ADR)
 00011E 411E FE41             7      CP  'A'
 000120 4120 2027            12      JR  NZ,NOT_8K_BANK
-000122 4122 3E02             7      LD  A,DISK_BANK
+000122 4122 3E01             7      LD  A,DISK_BANK
 000124 4124 320068          13      LD  (BANK1_SEL),A
                                 
 000127 4127 2A1360          16      LD  HL,(BANK1_ADR+19)   ;BPB_TotSec16   
@@ -123,7 +123,7 @@
 000133 4133 1F               4      RRA
 000134 4134 10FB            13      DJNZ    B_DRIVE1
                                 
-000136 4136 C602             7      ADD A,DISK_BANK     ;A=(TotSec16/16)+DISK_BANK
+000136 4136 C601             7      ADD A,DISK_BANK     ;A=(TotSec16/16)+DISK_BANK
 000138 4138 321DFB          13      LD  (B_DRIVE),A
                                 
                                 #if exists FIX_DRIVE
@@ -134,7 +134,7 @@
                                     CALL    MSX
                                     LD  A,(B_DRIVE)
                                     CALL    PRTHX
-                                    LD  IY,(EXPTBL) ;メインROMスロット
+                                    LD  IY,(EXPTBL-1)   ;メインROMスロット
                                     LD  IX,CHGET
                                     CALL    _CALSLT
                                     LD  HL,MSG_CRLF
@@ -151,7 +151,7 @@
                                                 ;ASCII-8K/Konami-8Kではない(ASCII-16K等)
 000149 4149 21C441          10      LD  HL,MSG_ERROR_ROM_MODE
 00014C 414C CD9441          17      CALL    MSX
-00014F 414F FD2AC1FC        20      LD  IY,(EXPTBL) ;メインROMスロット
+00014F 414F FD2AC0FC        20      LD  IY,(EXPTBL-1)   ;メインROMスロット
 000153 4153 DD219F00        14      LD  IX,CHGET
 000157 4157 C31C00          10      JP  _CALSLT
                                 
@@ -225,7 +225,7 @@
 0001A7 41A7 C5              11      PUSH    BC
 0001A8 41A8 D5              11      PUSH    DE
 0001A9 41A9 E5              11      PUSH    HL
-0001AA 41AA FD2AC1FC        20      LD  IY,(EXPTBL) ;メインROMスロット
+0001AA 41AA FD2AC0FC        20      LD  IY,(EXPTBL-1)   ;メインROMスロット
 0001AE 41AE DD21A200        14      LD  IX,CHPUT
 0001B2 41B2 CD1C00          17      CALL    _CALSLT
 0001B5 41B5 E1              10      POP HL
@@ -515,7 +515,7 @@
                                 
        4369                     GET_DISK_BANK:
 000369 4369 B7               4      OR  A       ;A=DRIVE
-00036A 436A 3E02             7      LD  A,DISK_BANK
+00036A 436A 3E01             7      LD  A,DISK_BANK
 00036C 436C C8              11      RET Z
                                 #if exists FIX_DRIVE
                                     LD  A,FIX_DRIVE
@@ -541,9 +541,9 @@
        4383                     DPB2DD_E:
 [EOF:MSXDISK.ASM:UTF_8]
                                 
-000383 4383                         DS  07FFFH-$
-003FFF 7FFF 00                      DB  0
-       8000                     LAST_ADR:
+000383 4383                         DS  05FFFH-$
+001FFF 5FFF 00                      DB  0
+       6000                     LAST_ADR:
                                 
                                     END
 [EOF:DISKROM.ASM:UTF_8]
