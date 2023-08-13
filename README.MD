@@ -37,35 +37,9 @@ copy /b DISKROM.BIN + DISK1.DSK + DISK2.dsk DISK1_2.ROM
 ## 実行方法
 
 1. ROMスロットに`MSX.ROM`をセット
-2. ROMイメージのタイプを`ASCII-8K`(2MB以下の場合のみ)、`Konami-8K`(512MB以下の場合のみ)のいずれかに設定
+2. ROMイメージのタイプを`ASCII-8K`(2MB以下の場合のみ)、`Konami-8K`か`Konami-SCC`(512MB以下の場合のみ)のいずれかに設定
 3. 起動しない場合はリセットする
 
-
-## 切り替え
-
-### ROM DISK 1枚の場合
-
-Tablacus DISK ROMオフ
-```basic
-POKE &HFB21,2:POKE &HFB22,PEEK(&HF348)
-```
-
-Tablacus DISK ROMオン
-```basic
-POKE &HFB21,1:POKE &HFB22,PEEK(&HFB1C)
-```
-
-### ROM DISK 2枚組の場合
-
-Tablacus DISK ROMオフ
-```basic
-POKE &HFB22,PEEK(&HF348)
-```
-
-Tablacus DISK ROMオン
-```basic
-POKE &HFB22,PEEK(&HFB1C)
-```
 
 ## ライセンス
 

@@ -2,11 +2,6 @@
 ;	Programmed by
 ;	Gaku (Lovers/Tablacus)
 ;
-;
-;	■アセンブル時にドライブAのFDDのサイズを指定する(Bドライブも使用する場合)
-;	2DDの場合
-;	FIX_DRIVE	EQU	720/8+2
-;
 
 	INCLUDE	"MSXDEF.ASM"
 
@@ -20,11 +15,17 @@
 	DW	0      ; TEXT
 	DW	0,0,0  ; Reserved
 
+_DISKIO:
 	JP	DISKIO
+_DSKCHG:
 	JP	DSKCHG
+_GETDPB:
 	JP	GETDPB
+_CHOICE:
 	JP	CHOICE
+_DSKFMT:
 	JP	DSKFMT
+_DSKSTP:
 	JP	DSKSTP
 ;	JP	BASENT
 ;	SCF
@@ -38,7 +39,7 @@
 	ORG	0407FH
 	RET
 ; Version
-	DB	"Tablacus DISK ROM v0.2.2.0",0
+	DB	"Tablacus DISK ROM v0.2.3.0",0
 
 	ORG	040FFH
 	RET

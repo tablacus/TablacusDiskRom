@@ -38,32 +38,6 @@ copy /b DISKROM.BIN + DISK1.DSK + DISK2.dsk DISK1_2.ROM
 2. Set ROM image type to either `ASCII-8K` (only for 2MB or less), or `Konami-8K` (only for 512MB or less)
 3. Reset if it does not start
 
-## Switch
-
-### For a single ROM DISK
-
-Turn off Tablacus DISK ROM
-```basic
-POKE &HFB21,2:POKE &HFB22,PEEK(&HF348)
-```
-
-Turn on Tablacus DISK ROM
-```basic
-POKE &HFB21,1:POKE &HFB22,PEEK(&HFB1C)
-```
-
-### For a set of 2 ROM DISKS
-
-Turn off Tablacus DISK ROM
-```basic
-POKE &HFB22,PEEK(&HF348)
-```
-
-Turn on Tablacus DISK ROM
-```basic
-POKE &HFB22,PEEK(&HFB1C)
-```
-
 ## License
 
 [MIT License](https://github.com/tablacus/TablacusDiskRom/blob/main/LICENSE.TXT)
