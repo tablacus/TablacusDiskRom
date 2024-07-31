@@ -16,6 +16,7 @@ INIT_ROM:
 	LD	(ROM_SLT),A
 
 	XOR	A
+	LD	(BANK0_SEL),A			;似非RAM対策でバンク0を設定
 	LD	(BANK1_SEL),A			;ASCII-8K/Konami-8K
 	LD	(KONAMI_SCC_BANK1_SEL),A	;Konami-8K/Konami-SCC
 	LD	A,(BANK1_ADR)

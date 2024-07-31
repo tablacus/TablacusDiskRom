@@ -356,7 +356,7 @@ DPB2DD:
 	DW	0007H	;FIRDIR
 DPB2DD_E:
 
-STR_CHOICE:
+STR_CHOICE1:
 	DB	00DH,00AH,"1 - 1 side, double track"
 	DB	00DH,00AH,"2 - 2 sides,double track"
 	DB	00DH,00AH,00DH,00AH,0
