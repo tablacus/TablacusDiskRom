@@ -44,6 +44,9 @@ copy /b DISKROM.BIN + DISK1.DSK + DISK2.dsk DISK1_2.ROM
 ## ライセンス
 
 [MIT License](https://github.com/tablacus/TablacusDiskRom/blob/main/LICENSE.TXT)
+MIT License のオープンソースです。  
+
+※有料、無料にかかわらず同人ソフトなどに組み込んで配布してもらっても問題ありません。
 
 ## 感謝
 
