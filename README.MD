@@ -7,10 +7,11 @@
 このソフトはMSXのDISK環境のソフトをROM化するソフトです。  
 ROM起動後にDRVTBLで使うスロットを書き換えて低レベルのディスクアクセスをROMディスクに置き換えます。  
 RS-232Cのワークエリアを使用しています。RS-232Cを変更するソフトは動作しないと思われます。
+似非RAMディスクの書き込みに対応しました。
 
 [LSX-Dodgers](https://github.com/tablacus/LSX-Dodgers)と違ってBASICのソフトをROM化することができますが、DISK BIOSが入っているMSXに限ります。LSX-DodgersはC-BIOSでも動作可能
 
-[Tabacus DISK ROM Lite](https://github.com/tablacus/TablacusDiskRomLite)はBASIC専用ですが、DISK BIOSが入っていないMSXでも動作します。
+[Tabacus DISK ROM Lite](https://github.com/tablacus/TablacusDiskRomLite)はDISK BIOSが入っていないMSXでも動作します。
 
 ROM DISKが1枚の場合はAドライブがROM DISKにBドライブがフロッピーのAドライブになります。
 
@@ -40,6 +41,11 @@ copy /b DISKROM.BIN + DISK1.DSK + DISK2.dsk DISK1_2.ROM
 2. ROMイメージのタイプを`ASCII-8K`(2MB以下の場合のみ)、`Konami-8K`か`Konami-SCC`(512MB以下の場合のみ)のいずれかに設定
 3. 起動しない場合はリセットする
 
+## WebMSX
+
+[WebMSX](https://webmsx.org/)でサンプルの`MSX.ROM`を起動するリンクはこちら
+
+https://webmsx.org/?MACHINE=MSX2J&CARTRIDGE1_URL=https://github.com/tablacus/TablacusDiskRom/raw/main/MSX.ROM
 
 ## ライセンス
 
