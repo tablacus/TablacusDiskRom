@@ -6,10 +6,10 @@
 
 DISK_WRITE:
 	OR	A
-	JR	Z,ERROR_WRITE_PROTECTED
+	JR	Z,DISK_WRITE1
 	LD	A,(B_DRIVE)
 	INC	A
-	JR	NZ,ERROR_WRITE_PROTECTED
+	JR	NZ,DISK_WRITE2
 	SCF
 CALL_DISKIO:
 	LD	IX,_DISKIO
@@ -18,10 +18,17 @@ CALL_MASTERS0:
 CALL_MASTERS:
 	LD	IY,(MASTERS-1)	;メインROMスロット
 	JP	_CALSLT
-ERROR_WRITE_PROTECTED:
-	XOR	A	;A=0 Write protected
-	SCF
-	RET
+DISK_WRITE2:
+	LD	A,1
+DISK_WRITE1:
+	LD	C,B
+	CALL	GET_DISK_BANK
+	PUSH	AF
+	XOR	A				;書き込みルーチンはBANK1(6000h-7fffh)に配置されている
+	LD	(BANK1_SEL),A			;ASCII-8K/Konami-8K
+	LD	(KONAMI_SCC_BANK1_SEL),A	;Konami-8K/Konami-SCC
+	POP	AF
+	JP	DISK_WRITE_RAM			;似非RAMディスクに書き込むルーチン
 DISKIO:
 	JR	C,DISK_WRITE
 	OR	A
@@ -34,7 +41,7 @@ DISKIO:
 DISK_READ:
 	LD	C,B
 	CALL	GET_DISK_BANK
-SETMAP1:		
+
 	PUSH	HL
 DISKIO1:
 	PUSH	BC		;B=残りのセクタ数
@@ -365,3 +372,53 @@ STR_CHOICE2:
 	DB	00DH,00AH,"1) 720KB"
 	DB	00DH,00AH,"2) 360KB"
 	DB	00DH,00AH,0
+
+;	似非RAMディスクに書き込むルーチン
+;	バンク選択レジスタのアドレスと被らないようにBANK0(4000h-5fffh)に書き込む為に
+;	書き込みルーチンはBANK1(6000h-7fffh)に配置する
+;
+	ORG	$+02000H
+DISK_WRITE_RAM:
+	OR	080H				;RAMディスクのアドレスを指定する為に80H以降にする
+	LD	(BANK0_SEL),A			;ASCII-8K/Konami-8K
+
+	PUSH	HL
+DISKIO1W:
+	PUSH	BC		;B=残りのセクタ数
+	PUSH	DE		;DE=セクタ番号
+	PUSH	AF		;A=8KB単位でカートリッジ内のディスクが存在する位置を指定
+
+	EX	DE,HL		;DE=書き込み先のメモリアドレス HL=セクタ番号
+	PUSH	AF
+	LD	A,(SECSZ_H)
+	CALL	MUL_AHL + 02000H	;
+	POP	AF
+	LD	C,L		;C=書き込み先
+	ADD	HL,HL		;64KB→32KB
+	ADD	HL,HL		;32KB→16KB
+	ADD	HL,HL		;16KB→8KB	バンク切り替えのサイズに合わせる
+	ADD	A,H
+	OR	080H				;RAMディスクのアドレスを指定する為に80H以降にする
+	LD	(BANK0_SEL),A			;ASCII-8K
+	LD	A,C		;C=書き込み先
+	AND	01FH		;セグメントのサイズでフィルタする(8K:1F)
+	ADD	A,high BANK0_ADR
+	LD	H,A
+	LD	BC,(SECSZ)	;BCは書き込むセクタサイズ
+	LD	L,C		;C=0
+	EX	DE,HL
+	LDIR
+	POP	AF
+	POP	DE
+	INC	DE
+	POP	BC
+	DJNZ	DISKIO1W
+	LD	B,C
+
+	POP	HL
+	XOR	A				;バンク0を元に戻す
+	LD	(BANK0_SEL),A			;ASCII-8K
+	EI
+	RET
+
+	ORG	$-02000H
